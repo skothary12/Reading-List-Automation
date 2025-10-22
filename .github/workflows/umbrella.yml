@@ -1,0 +1,40 @@
+name: Umbrella Notifier
+
+on:
+  schedule:
+    # Runs every 30 minutes; script itself only sends at 07:00 local time.
+    - cron: '*/30 * * * *'
+  workflow_dispatch:
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run umbrella checker
+        env:
+          OPENWEATHER_API_KEY: ${{ secrets.OPENWEATHER_API_KEY }}
+          LAT: ${{ secrets.LAT }}
+          LON: ${{ secrets.LON }}
+          EMAIL_SMTP_HOST: ${{ secrets.EMAIL_SMTP_HOST }}
+          EMAIL_SMTP_PORT: ${{ secrets.EMAIL_SMTP_PORT }}
+          EMAIL_USERNAME: ${{ secrets.EMAIL_USERNAME }}
+          EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
+          EMAIL_FROM: ${{ secrets.EMAIL_FROM }}
+          EMAIL_TO: ${{ secrets.EMAIL_TO }}
+          TIMEZONE: ${{ secrets.TIMEZONE }}
+          PRECIP_THRESHOLD: ${{ secrets.PRECIP_THRESHOLD }}
+        run: |
+          python scripts/check_umbrella.py
