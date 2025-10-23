@@ -1,0 +1,7 @@
+{
+  "MASTER_DOC_ID": "your-google-doc-id-for-reading-list",
+  "EMAIL_TO": "your.email@example.com",
+  "OPENAI_API_KEY": "sk-...",
+  "GOOGLE_CREDENTIALS": "./credentials.json",
+  "LLM_PROVIDER": "openai"
+}
