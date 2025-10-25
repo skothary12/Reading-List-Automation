@@ -7,9 +7,6 @@ on:
     - cron: '0 8 * * *'
   workflow_dispatch:  # Allows manual triggering from GitHub Actions tab
 
-permissions:
-  contents: write  # Allow the workflow to commit and push changes
-
 jobs:
   send-daily-reading:
     runs-on: ubuntu-latest
@@ -17,8 +14,15 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
+
+    - name: Restore tracking cache
+      id: cache-tracking
+      uses: actions/cache/restore@v4
       with:
-        fetch-depth: 0  # Fetch full history for proper git operations
+        path: sent_links.json
+        key: reading-list-tracking-${{ github.run_id }}
+        restore-keys: |
+          reading-list-tracking-
 
     - name: Set up Python
       uses: actions/setup-python@v5
@@ -41,23 +45,9 @@ jobs:
         EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
       run: python daily_reading.py
 
-    - name: Commit and push updated tracking file
-      run: |
-        git config --local user.email "github-actions[bot]@users.noreply.github.com"
-        git config --local user.name "github-actions[bot]"
-
-        # Fetch latest changes from remote
-        git fetch origin main
-
-        # Add and check for changes
-        git add sent_links.json
-        if git diff --staged --quiet; then
-          echo "No changes to commit"
-        else
-          # Commit the changes
-          git commit -m "Update sent links tracking [skip ci]"
-
-          # Pull with rebase to sync with remote, then push
-          git pull --rebase origin main
-          git push origin HEAD:main
-        fi
+    - name: Save tracking cache
+      uses: actions/cache/save@v4
+      if: always()  # Save cache even if the workflow fails
+      with:
+        path: sent_links.json
+        key: reading-list-tracking-${{ github.run_id }}
