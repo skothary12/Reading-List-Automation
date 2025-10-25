@@ -112,7 +112,7 @@ def send_email(to_email, subject, title, url, summary, smtp_config):
     Send an email with the article summary.
 
     Args:
-        to_email: Recipient email address
+        to_email: Recipient email address(es) - can be a single email or comma-separated list
         subject: Email subject
         title: Article title
         url: Article URL
@@ -127,10 +127,17 @@ def send_email(to_email, subject, title, url, summary, smtp_config):
         Dictionary with success status
     """
     try:
+        # Parse email addresses (handle comma-separated list)
+        if isinstance(to_email, str):
+            # Split by comma and clean up whitespace
+            recipients = [email.strip() for email in to_email.split(',')]
+        else:
+            recipients = [to_email]
+
         # Create message
         msg = MIMEMultipart('alternative')
         msg['From'] = smtp_config['email']
-        msg['To'] = to_email
+        msg['To'] = ', '.join(recipients)  # Display all recipients in header
         msg['Subject'] = subject
 
         # Create plain text version (fallback)
@@ -160,11 +167,13 @@ This is your automated daily reading digest.
         with smtplib.SMTP(smtp_config['server'], smtp_config['port']) as server:
             server.starttls()
             server.login(smtp_config['email'], smtp_config['password'])
-            server.send_message(msg)
+            # Send to all recipients
+            server.sendmail(smtp_config['email'], recipients, msg.as_string())
 
+        recipient_list = ', '.join(recipients)
         return {
             'success': True,
-            'message': f"Email sent successfully to {to_email}"
+            'message': f"Email sent successfully to {recipient_list}"
         }
 
     except Exception as e:
