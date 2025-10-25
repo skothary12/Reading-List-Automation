@@ -106,14 +106,21 @@ def main():
         print("Scraping article content...")
         article = scrape_article(selected_link)
 
-        if article['success']:
+        # Check if scraping was successful AND has meaningful content
+        if article['success'] and len(article.get('text', '')) > 100:
             print(f"✓ Successfully scraped article")
             break
         else:
-            print(f"✗ Error scraping article: {article.get('error', 'Unknown error')}")
+            # Determine the error message
+            if not article['success']:
+                error_msg = article.get('error', 'Unknown error')
+            else:
+                error_msg = f"Article has insufficient content ({len(article.get('text', ''))} characters)"
+
+            print(f"✗ Error: {error_msg}")
             print(f"Marking this link as failed and trying another...")
             # Mark as sent so we don't retry it
-            tracker.mark_as_sent(selected_link, f"FAILED: {article.get('error', 'Unknown error')[:100]}")
+            tracker.mark_as_sent(selected_link, f"FAILED: {error_msg[:100]}")
             # Remove from unsent list for this run
             unsent_links.remove(selected_link)
             if not unsent_links:
