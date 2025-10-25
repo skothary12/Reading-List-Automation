@@ -136,6 +136,24 @@ Your Google Doc should:
 - Be shared with "Anyone with the link can view"
 - Contain URLs to articles (one per line or in bullet points)
 
+### Validate Your Links
+
+Before running the automation, validate that your links can be scraped:
+
+```bash
+export GOOGLE_DOC_URL="your-google-doc-url"
+python3 validate_links.py
+```
+
+This will test each link and identify problematic ones:
+- Links that return 403 Forbidden errors
+- Links with insufficient content (paywalled, login required, etc.)
+- Inbox/private links that require authentication
+
+**Common issues:**
+- ❌ Substack inbox links: `https://substack.com/inbox/post/...`
+- ✓ Use public article links instead: `https://author.substack.com/p/article-title`
+
 ## How It Works
 
 1. The script reads your Google Doc and extracts all URLs
