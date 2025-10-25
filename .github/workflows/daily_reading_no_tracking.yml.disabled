@@ -1,0 +1,43 @@
+name: Daily Reading Digest (No Tracking)
+
+# This is a simplified version that doesn't track sent articles
+# Rename this file to daily_reading.yml to use it (and rename the other one to .disabled)
+# This version doesn't need write permissions
+
+on:
+  schedule:
+    # Run every day at 8:00 AM UTC (adjust to your timezone)
+    - cron: '0 8 * * *'
+  workflow_dispatch:  # Allows manual triggering from GitHub Actions tab
+
+jobs:
+  send-daily-reading:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.9'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Run daily reading script
+      env:
+        GOOGLE_DOC_URL: ${{ secrets.GOOGLE_DOC_URL }}
+        OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        EMAIL_TO: ${{ secrets.EMAIL_TO }}
+        EMAIL_SMTP_SERVER: ${{ secrets.EMAIL_SMTP_SERVER }}
+        EMAIL_SMTP_PORT: ${{ secrets.EMAIL_SMTP_PORT }}
+        EMAIL_ADDRESS: ${{ secrets.EMAIL_ADDRESS }}
+        EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
+      run: python daily_reading.py
+
+    # No commit/push step - tracking will be lost between runs
+    # This means articles may repeat, but no permissions needed
