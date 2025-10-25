@@ -1,0 +1,34 @@
+# API Keys and Sensitive Configuration
+config.json
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+*.egg-info/
+dist/
+build/
+
+# Local tracking files (these will be committed to track progress)
+# sent_links.json is tracked so GitHub Actions can persist state
+
+# Downloaded temporary files
+downloaded_doc.txt
+downloaded_doc.html
+
+# macOS
+.DS_Store
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Test files
+test_tracking.json
