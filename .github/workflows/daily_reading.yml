@@ -17,6 +17,8 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
+      with:
+        fetch-depth: 0  # Fetch full history for proper git operations
 
     - name: Set up Python
       uses: actions/setup-python@v5
@@ -43,10 +45,19 @@ jobs:
       run: |
         git config --local user.email "github-actions[bot]@users.noreply.github.com"
         git config --local user.name "github-actions[bot]"
+
+        # Fetch latest changes from remote
+        git fetch origin main
+
+        # Add and check for changes
         git add sent_links.json
         if git diff --staged --quiet; then
           echo "No changes to commit"
         else
+          # Commit the changes
           git commit -m "Update sent links tracking [skip ci]"
-          git push
+
+          # Pull with rebase to sync with remote, then push
+          git pull --rebase origin main
+          git push origin HEAD:main
         fi
