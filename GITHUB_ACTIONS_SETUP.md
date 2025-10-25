@@ -1,6 +1,10 @@
-# GitHub Actions Permission Fix
+# GitHub Actions Setup Guide
 
-You're getting a 403 error because GitHub Actions doesn't have permission to push to your repository.
+This guide helps you fix common GitHub Actions errors.
+
+## Error 1: "Permission denied" (403)
+
+**Solution:** Enable write permissions for GitHub Actions.
 
 ## Solution: Enable Workflow Permissions
 
@@ -47,6 +51,24 @@ After enabling permissions, the workflow should:
 
 ---
 
+## Error 2: "Updates were rejected" (fetch first)
+
+**Error message:**
+```
+! [rejected]        HEAD -> main (fetch first)
+error: failed to push some refs
+hint: Updates were rejected because the remote contains work that you do not have locally
+```
+
+**Solution:** This is a merge conflict. The workflow has been updated to automatically handle this by:
+1. Fetching latest changes from remote
+2. Rebasing your changes on top
+3. Pushing successfully
+
+✅ **This is already fixed in the latest workflow** - just re-run the failed job.
+
+---
+
 ## Still Getting Errors?
 
 If you're still getting errors after enabling permissions:
@@ -54,3 +76,4 @@ If you're still getting errors after enabling permissions:
 1. Make sure the latest workflow file was pushed (check the Actions tab to see which version is running)
 2. Try creating a **new** manual workflow run (not re-running an old one)
 3. Check that your default branch is `main` (Settings → General → Default branch)
+4. Ensure you've added all 7 required secrets (see main README.md)
