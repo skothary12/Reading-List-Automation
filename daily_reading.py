@@ -91,16 +91,38 @@ def main():
 
     print(f"Available unsent links: {len(unsent_links)}")
 
-    # Select a random link
-    selected_link = random.choice(unsent_links)
-    print(f"\nSelected article: {selected_link}")
+    # Try multiple articles if scraping fails
+    max_attempts = min(3, len(unsent_links))
+    article = None
+    selected_link = None
 
-    # Scrape the article
-    print("\nScraping article content...")
-    article = scrape_article(selected_link)
+    for attempt in range(max_attempts):
+        # Select a random link
+        selected_link = random.choice(unsent_links)
+        print(f"\nAttempt {attempt + 1}/{max_attempts}")
+        print(f"Selected article: {selected_link}")
 
-    if not article['success']:
-        print(f"Error scraping article: {article.get('error', 'Unknown error')}")
+        # Scrape the article
+        print("Scraping article content...")
+        article = scrape_article(selected_link)
+
+        if article['success']:
+            print(f"✓ Successfully scraped article")
+            break
+        else:
+            print(f"✗ Error scraping article: {article.get('error', 'Unknown error')}")
+            print(f"Marking this link as failed and trying another...")
+            # Mark as sent so we don't retry it
+            tracker.mark_as_sent(selected_link, f"FAILED: {article.get('error', 'Unknown error')[:100]}")
+            # Remove from unsent list for this run
+            unsent_links.remove(selected_link)
+            if not unsent_links:
+                print("\nNo more unsent links available")
+                sys.exit(1)
+            article = None
+
+    if not article or not article['success']:
+        print(f"\nFailed to scrape any articles after {max_attempts} attempts")
         sys.exit(1)
 
     print(f"Title: {article['title']}")

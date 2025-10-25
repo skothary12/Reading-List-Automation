@@ -1,5 +1,6 @@
 # API Keys and Sensitive Configuration
 config.json
+setup_local_config_private.sh
 
 # Python
 __pycache__/
