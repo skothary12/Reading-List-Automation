@@ -128,7 +128,7 @@ def main():
     print(f"Title: {article['title']}")
     print(f"Content length: {len(article['text'])} characters")
 
-    # Generate AI summary
+    # Generate AI summary (with fallback if it fails)
     print("\nGenerating AI summary...")
     summary_result = summarize_article(
         article['title'],
@@ -136,11 +136,27 @@ def main():
         config['openai_api_key']
     )
 
+    summary_text = None
     if not summary_result['success']:
-        print(f"Error generating summary: {summary_result.get('error', 'Unknown error')}")
-        sys.exit(1)
+        print(f"⚠️  Warning: Failed to generate AI summary: {summary_result.get('error', 'Unknown error')}")
+        print("Continuing with fallback summary...")
 
-    print(f"Summary generated ({summary_result['tokens_used']} tokens used)")
+        # Create a fallback summary with article preview
+        preview_length = 500
+        preview_text = article['text'][:preview_length].strip()
+        if len(article['text']) > preview_length:
+            preview_text += "..."
+
+        summary_text = f"""⚠️ AI Summary Unavailable
+
+The AI summarization service is currently unavailable. Here's a preview of the article:
+
+{preview_text}
+
+Please read the full article using the link below."""
+    else:
+        print(f"✓ Summary generated successfully ({summary_result['tokens_used']} tokens used)")
+        summary_text = summary_result['summary']
 
     # Send email
     print("\nSending email...")
@@ -151,7 +167,7 @@ def main():
         subject=email_subject,
         title=article['title'],
         url=selected_link,
-        summary=summary_result['summary'],
+        summary=summary_text,
         smtp_config=config['email']['smtp']
     )
 
